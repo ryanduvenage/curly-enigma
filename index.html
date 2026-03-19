@@ -14,10 +14,10 @@
 -->
 <script>
 var CONFIG = {
-  BREVO_API_KEY:  'YOUR_BREVO_API_KEY',
+  BREVO_API_KEY:  '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',
   SENDER_NAME:    'Attend. Register',
-  SENDER_EMAIL:   'noreply@yourorganisation.com',
-  ADMIN_EMAIL:    'admin@yourorganisation.com',
+  SENDER_EMAIL:   'Ryan.duvenage@thirst.co.za',
+  ADMIN_EMAIL:    'dbaadmin@thirst.co.za',
   ADMIN_NAME:     'Training Admin'
 };
 </script>
@@ -423,7 +423,7 @@ function buildPDF(session) {
     doc.setTextColor(40,60,140); doc.setDrawColor(180,195,230);
     var hx = M;
     for(var i=0; i<CW.length; i++){
-      doc.rect(r(hx), rhy, r(CW[i]), r(HDRH), 'SD');
+      doc.rect(r(hx), rhy, r(CW[i]), r(HDRH), 'S');
       doc.text(PDF.HDR[i], r(hx+4), r(hy+13));
       hx += CW[i];
     }
@@ -456,11 +456,11 @@ function buildPDF(session) {
     var vals=[String(ai+1),String(a.fname||''),String(a.sname||''),String(a.gender||''),String(a.email||''),String(a.phone||''),a.consent?'Yes':'No',String(a.time||'')];
     var cx = M;
     for(var ci=0; ci<CW.length-1; ci++){
-      doc.rect(r(cx), r(ty), r(CW[ci]), r(ROWH), 'SD');
+      doc.rect(r(cx), r(ty), r(CW[ci]), r(ROWH), 'S');
       doc.text(trunc(vals[ci], CW[ci]-8), r(cx+4), r(ty+16));
       cx += CW[ci];
     }
-    doc.rect(r(sigX), r(ty), r(CW[8]), r(ROWH), 'SD');
+    doc.rect(r(sigX), r(ty), r(CW[8]), r(ROWH), 'S');
     var sig = a.sig;
     if(sig && typeof sig==='string' && sig.indexOf('data:image')===0){
       var b64 = sig.split(',')[1];
