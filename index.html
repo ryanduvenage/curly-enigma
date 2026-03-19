@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F4CB;</text></svg>">
+<title>Attend. - Training Session Register v8</title>
+
+<!--
+  CONFIGURATION - fill in before deploying
+  1. Sign up free at https://app.brevo.com
+  2. Account menu > SMTP and API > API Keys > Generate v3 key
+  3. Senders and IPs > Senders > verify your sender email
+-->
+<script>
+var CONFIG = {
+  BREVO_API_KEY:  'YOUR_BREVO_API_KEY',
+  SENDER_NAME:    'Attend. Register',
+  SENDER_EMAIL:   'noreply@yourorganisation.com',
+  ADMIN_EMAIL:    'admin@yourorganisation.com',
+  ADMIN_NAME:     'Training Admin'
+};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#1a1a1a;--ink2:#555;--ink3:#999;
+  --line:#e8e6e1;--line2:#d0cdc7;
+  --bg:#faf9f7;--surface:#fff;--surface2:#f4f2ee;
+  --accent:#2d5be3;--accent-light:#eef1fd;--accent-text:#1a3db5;
+  --green:#1a8a5a;--green-light:#e8f7f0;
+  --red:#c0392b;--red-light:#fdecea;
+  --purple:#534ab7;--purple-light:#eeedfe;
+  --r:10px;--r2:6px;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;}
+.app{max-width:700px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+.nav{display:flex;align-items:center;justify-content:space-between;padding-bottom:1.5rem;border-bottom:1px solid var(--line);margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;}
+.nav-brand{font-size:17px;font-weight:700;letter-spacing:-.5px;}
+.nav-brand span{color:var(--accent);}
+.nav-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--r2);padding:3px;}
+.tab-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;border:none;background:none;padding:5px 14px;border-radius:4px;cursor:pointer;color:var(--ink2);transition:all .15s;}
+.tab-btn.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.screen{display:none;}.screen.active{display:block;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:13px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem;}
+.session-header{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;}
+.session-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent-text);background:var(--accent-light);padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:8px;}
+.session-name{font-size:20px;font-weight:600;letter-spacing:-.4px;margin-bottom:4px;}
+.session-meta-row{font-size:13px;color:var(--ink3);display:flex;gap:16px;flex-wrap:wrap;}
+.session-meta-row strong{color:var(--ink2);}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;margin-top:8px;}
+.pill-green{color:var(--green);background:var(--green-light);}
+.pill-purple{color:var(--purple);background:var(--purple-light);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:12px;font-weight:500;color:var(--ink2);}
+.form-group input,.form-group select{font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border:1px solid var(--line2);border-radius:var(--r2);background:var(--surface);color:var(--ink);outline:none;transition:border .15s;-webkit-appearance:none;appearance:none;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
+.form-group input.err{border-color:var(--red);}
+.form-group select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;}
+.sig-wrap{border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;}
+.sig-canvas{display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;background:#fff;}
+.sig-actions{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border-top:1px solid var(--line);background:var(--surface2);}
+.sig-hint{font-size:11px;color:var(--ink3);}
+.clear-btn{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--ink3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;}
+.clear-btn:hover{color:var(--red);background:var(--red-light);}
+.consent-row{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-top:1px solid var(--line);}
+.consent-row input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:var(--accent);flex-shrink:0;}
+.consent-row label{font-size:13px;color:var(--ink2);line-height:1.5;cursor:pointer;}
+.btn{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:10px 20px;border-radius:var(--r2);cursor:pointer;border:1px solid transparent;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.btn-primary:hover:not(:disabled){background:#2450cc;}
+.btn-secondary{background:var(--surface);color:var(--ink2);border-color:var(--line2);}
+.btn-secondary:hover:not(:disabled){border-color:var(--ink3);}
+.btn-close{background:var(--purple-light);color:var(--purple);border-color:#c5c2f0;}
+.btn-close:hover:not(:disabled){background:#e0dffb;}
+.btn-sm{font-size:12px;padding:6px 12px;}
+.btn-full{width:100%;}
+.btn-row{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap;}
+.close-panel{background:var(--purple-light);border:1px solid #c5c2f0;border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;}
+.close-panel h3{font-size:15px;font-weight:600;color:var(--purple);margin-bottom:6px;}
+.close-panel p{font-size:13px;color:#6b5fc0;line-height:1.6;margin-bottom:1rem;}
+.progress-wrap{background:rgba(83,74,183,.15);border-radius:4px;height:5px;margin:0 0 1rem;overflow:hidden;display:none;}
+.progress-wrap.show{display:block;}
+.progress-bar{height:100%;background:var(--purple);border-radius:4px;transition:width .4s ease;}
+.status-steps{display:none;flex-direction:column;gap:6px;margin-bottom:1rem;}
+.status-steps.show{display:flex;}
+.status-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink3);}
+.status-step.done{color:var(--green);}
+.status-step.active{color:var(--purple);font-weight:500;}
+.status-step.error{color:var(--red);}
+.step-icon{width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;}
+.status-step.done .step-icon{background:var(--green);border-color:var(--green);color:#fff;}
+.flash{border-radius:var(--r2);padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:1rem;display:none;align-items:center;gap:8px;line-height:1.5;}
+.flash.show{display:flex;}
+.flash-success{background:var(--green-light);color:var(--green);border:1px solid #b2dfc9;}
+.flash-error{background:var(--red-light);color:var(--red);border:1px solid #f0b3ae;}
+.flash-info{background:var(--accent-light);color:var(--accent-text);border:1px solid #c5d0f7;}
+.att-table{width:100%;border-collapse:collapse;font-size:13px;}
+.att-table th{text-align:left;font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px;padding:6px 8px;border-bottom:1px solid var(--line);background:var(--surface2);}
+.att-table td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink2);}
+.att-table tr:last-child td{border-bottom:none;}
+.att-sig-thumb{width:72px;height:28px;border:1px solid var(--line);border-radius:3px;background:#fff;display:block;}
+.consent-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.consent-dot.yes{background:var(--green);}.consent-dot.no{background:var(--line2);}
+.session-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:border-color .15s;}
+.session-item:hover{border-color:var(--accent);}
+.session-item.closed{border-color:#c5c2f0;background:#faf9ff;}
+.session-item-name{font-size:15px;font-weight:500;margin-bottom:3px;}
+.session-item-meta{font-size:12px;color:var(--ink3);}
+.modal-bg{position:fixed;inset:0;background:rgba(250,249,247,.95);display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;z-index:100;overflow-y:auto;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.5rem;width:100%;max-width:460px;}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:1.25rem;}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--ink3);}
+.footer{text-align:center;font-size:11px;color:var(--ink3);margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr;}.form-group.full{grid-column:1;}.att-table th:nth-child(4),.att-table td:nth-child(4),.att-table th:nth-child(5),.att-table td:nth-child(5){display:none;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="nav">
+    <div class="nav-brand">Attend<span>.</span></div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('register')">Register</button>
+      <button class="tab-btn" onclick="switchTab('sessions')">Sessions</button>
+    </div>
+  </div>
+
+  <div class="screen active" id="screen-register">
+    <div id="no-session-msg" class="empty-state">
+      <div style="font-size:36px;margin-bottom:1rem;">&#x1F4CB;</div>
+      <p style="font-size:15px;font-weight:600;color:var(--ink2);margin-bottom:6px;">No active session</p>
+      <p style="font-size:13px;margin-bottom:1.5rem;">Create a new session to begin registering attendees.</p>
+      <button class="btn btn-primary" onclick="openNewSession()">Create session</button>
+    </div>
+    <div id="register-content" style="display:none;">
+      <div class="session-header">
+        <div class="session-id" id="disp-id"></div>
+        <div class="session-name" id="disp-name"></div>
+        <div class="session-meta-row">
+          <span><strong>Date:</strong> <span id="disp-date"></span></span>
+          <span><strong>Facilitator:</strong> <span id="disp-fac"></span></span>
+          <span><strong>Venue:</strong> <span id="disp-venue"></span></span>
+        </div>
+        <div>
+          <span class="pill pill-green" id="count-badge">0 attendees</span>
+          <span class="pill pill-purple" id="closed-badge" style="display:none;">Session closed</span>
+        </div>
+      </div>
+      <div class="flash flash-success" id="flash-success"><span>&#x2713;</span><span id="flash-success-text"></span></div>
+      <div class="flash flash-error"   id="flash-error"><span>&#x2717;</span><span id="flash-error-text"></span></div>
+      <div class="flash flash-info"    id="flash-info"><span>&#x2139;</span><span id="flash-info-text"></span></div>
+      <div class="close-panel" id="close-panel">
+        <h3>Close &amp; send register</h3>
+        <p>When training is complete, close the session to generate a PDF and email it to <strong id="admin-email-display"></strong>. A local copy will also download.</p>
+        <div class="progress-wrap" id="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="status-steps" id="status-steps">
+          <div class="status-step" id="step-pdf"><div class="step-icon">1</div><span>Generating PDF</span></div>
+          <div class="status-step" id="step-email"><div class="step-icon">2</div><span>Sending via Brevo</span></div>
+          <div class="status-step" id="step-done"><div class="step-icon">3</div><span>Complete</span></div>
+        </div>
+        <button class="btn btn-close" id="close-btn" onclick="closeSession()">Close session &amp; email register</button>
+      </div>
+      <div id="closed-actions" style="display:none;" class="card">
+        <div class="card-title">Session closed</div>
+        <p style="font-size:13px;color:var(--ink2);margin-bottom:1rem;">Register emailed to <strong id="closed-email-display"></strong>.</p>
+        <button class="btn btn-secondary btn-sm" onclick="downloadPDF()">Re-download PDF</button>
+      </div>
+      <div class="card" id="form-card">
+        <div class="card-title">New attendee</div>
+        <div class="form-grid">
+          <div class="form-group"><label>First name *</label><input id="f-fname" type="text" placeholder="e.g. Thabo" autocomplete="given-name"/></div>
+          <div class="form-group"><label>Surname *</label><input id="f-sname" type="text" placeholder="e.g. Nkosi" autocomplete="family-name"/></div>
+          <div class="form-group"><label>Gender</label><select id="f-gender"><option value="">Select...</option><option>Male</option><option>Female</option><option>Non-binary</option><option>Prefer not to say</option></select></div>
+          <div class="form-group"><label>Phone number</label><input id="f-phone" type="tel" placeholder="+27 ..."/></div>
+          <div class="form-group full"><label>Email address *</label><input id="f-email" type="email" placeholder="name@example.com"/></div>
+          <div class="form-group full">
+            <label>Signature *</label>
+            <div class="sig-wrap"><canvas class="sig-canvas" id="sig-canvas"></canvas>
+            <div class="sig-actions"><span class="sig-hint">Sign using finger or stylus</span><button class="clear-btn" onclick="clearSig()">Clear</button></div></div>
+          </div>
+        </div>
+        <div class="consent-row">
+          <input type="checkbox" id="f-consent"/>
+          <label for="f-consent">I agree to receive marketing communications about upcoming training and events. I may unsubscribe at any time.</label>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary btn-full" id="submit-btn" onclick="submitAttendee()">Register attendee</button></div>
+      </div>
+      <div class="card" id="attendee-card" style="display:none;">
+        <div class="card-title">Registered attendees</div>
+        <div style="overflow-x:auto;"><table class="att-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Gender</th><th>Consent</th><th>Time</th><th>Signature</th></tr></thead><tbody id="att-tbody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-sessions">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div style="font-size:16px;font-weight:600;">All sessions</div>
+      <button class="btn btn-primary btn-sm" onclick="openNewSession()">+ New session</button>
+    </div>
+    <div id="sessions-list"></div>
+  </div>
+
+  <div class="footer">
+    Attend. &mdash; Training Session Register &mdash; Powered by Brevo &mdash; v8
+    &nbsp;&bull;&nbsp;<button onclick="resetAllData()" style="font-family:inherit;font-size:11px;color:var(--ink3);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;">Reset all data</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3>Create new session</h3>
+    <div class="form-grid">
+      <div class="form-group full"><label>Session name *</label><input id="ns-name" type="text" placeholder="e.g. Fire Safety Training"/></div>
+      <div class="form-group"><label>Date *</label><input id="ns-date" type="date"/></div>
+      <div class="form-group"><label>Facilitator *</label><input id="ns-fac" type="text" placeholder="Full name"/></div>
+      <div class="form-group full"><label>Venue / Location</label><input id="ns-venue" type="text" placeholder="e.g. Conference Room A"/></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="create-btn" onclick="createSession()">Create session</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Storage ----
+var IDX='att_v8_idx', SP='att_v8_s_', AK='att_v8_act';
+var state={sessions:[],activeId:null};
+function lsGet(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function loadState(){
+  var idx=lsGet(IDX);
+  if(idx&&idx.ids)state.sessions=idx.ids.map(function(id){return lsGet(SP+id);}).filter(Boolean);
+  var act=lsGet(AK);
+  if(act)state.activeId=act.id;
+}
+function saveSession(s){lsSet(SP+s.id,s);lsSet(IDX,{ids:state.sessions.map(function(x){return x.id;})});}
+function saveActive(){lsSet(AK,{id:state.activeId});}
+
+// ---- Utils ----
+function genId(){
+  var d=new Date();
+  return 'TRN-'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+Math.floor(Math.random()*900+100);
+}
+function fmtDate(s){
+  try{return new Date(s+'T12:00:00').toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'});}
+  catch(e){return s||'';}
+}
+function R(v){return Math.round(v*100)/100;}  // round to 2dp for jsPDF
+
+function showFlash(type,msg,ms){
+  ['success','error','info'].forEach(function(t){var e=document.getElementById('flash-'+t);if(e)e.classList.remove('show');});
+  var el=document.getElementById('flash-'+type);
+  var tx=document.getElementById('flash-'+type+'-text');
+  if(!el||!tx)return;
+  tx.textContent=msg;el.classList.add('show');
+  if(ms)setTimeout(function(){el.classList.remove('show');},ms);
+}
+function setProgress(p){
+  var w=document.getElementById('progress-wrap'),b=document.getElementById('progress-bar');
+  if(p>0){w.classList.add('show');b.style.width=p+'%';}else{w.classList.remove('show');b.style.width='0%';}
+}
+function setStep(id,st){
+  var el=document.getElementById(id);if(!el)return;
+  el.className='status-step'+(st?' '+st:'');
+  var ic=el.querySelector('.step-icon');
+  if(ic)ic.textContent=st==='done'?'&#x2713;':st==='error'?'&#x2717;':ic.textContent;
+}
+function showSteps(v){var el=document.getElementById('status-steps');if(el)el.classList.toggle('show',v);}
+
+// ---- Tab / Modal ----
+function switchTab(t){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.textContent.toLowerCase()===t);});
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('screen-'+t).classList.add('active');
+  if(t==='sessions')renderSessions();
+}
+function openNewSession(){
+  document.getElementById('ns-date').value=new Date().toISOString().split('T')[0];
+  ['ns-name','ns-fac','ns-venue'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('modal-bg').classList.add('open');
+  setTimeout(function(){document.getElementById('ns-name').focus();},100);
+}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+
+// ---- Session CRUD ----
+function createSession(){
+  var name=document.getElementById('ns-name').value.trim();
+  var date=document.getElementById('ns-date').value;
+  var fac=document.getElementById('ns-fac').value.trim();
+  var venue=document.getElementById('ns-venue').value.trim();
+  if(!name||!date||!fac){alert('Please fill in Session name, Date and Facilitator.');return;}
+  var s={id:genId(),name:name,date:date,fac:fac,venue:venue,attendees:[],closed:false,created:Date.now()};
+  state.sessions.unshift(s);state.activeId=s.id;
+  saveSession(s);saveActive();
+  closeModal();switchTab('register');renderRegister();
+}
+function loadSession(id){state.activeId=id;saveActive();switchTab('register');renderRegister();}
+function resetAllData(){
+  if(!confirm('Delete ALL stored sessions from this device?'))return;
+  Object.keys(localStorage).forEach(function(k){if(k.indexOf('att_v8_')===0)localStorage.removeItem(k);});
+  state={sessions:[],activeId:null};
+  renderRegister();
+  showFlash('info','All data cleared. Create a new session.',4000);
+}
+
+// ---- Signature ----
+var sigCanvas,sigCtx,drawing=false,hasSig=false,lastX=0,lastY=0;
+function initSig(){
+  sigCanvas=document.getElementById('sig-canvas');
+  if(!sigCanvas)return;
+  sigCtx=sigCanvas.getContext('2d');
+  sigCanvas.width=sigCanvas.offsetWidth;sigCanvas.height=sigCanvas.offsetHeight;
+  sigCtx.strokeStyle='#1a1a1a';sigCtx.lineWidth=1.8;sigCtx.lineCap='round';sigCtx.lineJoin='round';
+  hasSig=false;
+  function pos(e){var r=sigCanvas.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*(sigCanvas.width/r.width),y:(s.clientY-r.top)*(sigCanvas.height/r.height)};}
+  sigCanvas.onmousedown=function(e){drawing=true;var p=pos(e);lastX=p.x;lastY=p.y;hasSig=true;};
+  sigCanvas.onmousemove=function(e){if(!drawing)return;var p=pos(e);sigCtx.beginPath();sigCtx.moveTo(lastX,lastY);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();lastX=p.x;lastY=p.y;};
+  sigCanvas.onmouseup=function(){drawing=false;};
+  sigCanvas.onmouseleave=function(){drawing=false;};
+  sigCanvas.ontouchstart=function(e){e.preventDefault();drawing=true;var p=pos(e);lastX=p.x;lastY=p.y;hasSig=true;};
+  sigCanvas.ontouchmove=function(e){e.preventDefault();if(!drawing)return;var p=pos(e);sigCtx.beginPath();sigCtx.moveTo(lastX,lastY);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();lastX=p.x;lastY=p.y;};
+  sigCanvas.ontouchend=function(){drawing=false;};
+}
+function clearSig(){if(sigCtx){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);hasSig=false;}}
+
+// ---- Submit ----
+function submitAttendee(){
+  var fname=document.getElementById('f-fname').value.trim();
+  var sname=document.getElementById('f-sname').value.trim();
+  var email=document.getElementById('f-email').value.trim();
+  ['f-fname','f-sname','f-email'].forEach(function(id){document.getElementById(id).classList.toggle('err',!document.getElementById(id).value.trim());});
+  if(!fname||!sname||!email)return;
+  if(!hasSig){alert('Please draw a signature before submitting.');return;}
+  var s=state.sessions.find(function(x){return x.id===state.activeId;});
+  if(!s||s.closed)return;
+  var sig='';
+  try{sig=sigCanvas.toDataURL('image/png');}catch(e){try{sig=sigCanvas.toDataURL('image/jpeg',0.8);}catch(e2){sig='';}}
+  s.attendees.push({fname:fname,sname:sname,email:email,gender:document.getElementById('f-gender').value,phone:document.getElementById('f-phone').value.trim(),consent:document.getElementById('f-consent').checked,sig:sig,time:new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'})});
+  saveSession(s);
+  ['f-fname','f-sname','f-email','f-phone'].forEach(function(id){document.getElementById(id).value='';document.getElementById(id).classList.remove('err');});
+  document.getElementById('f-gender').value='';document.getElementById('f-consent').checked=false;clearSig();
+  updateCount();renderAttendeeTable(s);
+  showFlash('success',fname+' '+sname+' registered successfully.',4000);
+}
+
+// ---- PDF ----
+// All dimensions in pt. A4 landscape: 841.89 x 595.28 pt. Margin: 39.69 pt.
+// Column widths (pt) sum to 762.51 = 841.89 - 2*39.69
+var PDF = {
+  PW:   841.89,
+  PH:   595.28,
+  M:    39.69,
+  TW:   762.51,
+  HDRH: 19.84,
+  ROWH: 45.35,
+  // Column widths — hardcoded, sum verified = 762.51
+  CW:   [19.84, 79.37, 79.37, 51.02, 141.73, 70.87, 45.35, 39.69, 235.27],
+  HDR:  ['#','First Name','Surname','Gender','Email','Phone','Consent','Time','Signature']
+};
+
+function buildPDF(session) {
+  var doc = new window.jspdf.jsPDF({orientation:'landscape', unit:'pt', format:'a4'});
+  var PW=PDF.PW, PH=PDF.PH, M=PDF.M, TW=PDF.TW, HDRH=PDF.HDRH, ROWH=PDF.ROWH, CW=PDF.CW;
+
+  // Helper: round value for jsPDF
+  function r(v){ return Math.round(v * 100) / 100; }
+
+  // Helper: truncate text to fit width
+  function trunc(txt, maxW) {
+    txt = String(txt == null ? '' : txt);
+    while(txt.length > 1 && doc.getTextWidth(txt) > maxW) txt = txt.slice(0,-1);
+    return txt;
+  }
+
+  // Title bar
+  doc.setFillColor(45,91,227);
+  doc.rect(r(0), r(0), r(PW), r(51), 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
+  doc.text('TRAINING SESSION ATTENDANCE REGISTER', r(M), r(34));
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Attend.', r(PW-M), r(34), {align:'right'});
+
+  // Meta
+  doc.setTextColor(30,30,30); doc.setFontSize(8.5);
+  var c2 = M + TW/2 + 11;
+  var metaY = 77;
+  var metaRows = [
+    ['Session:',     trunc(String(session.name||'-'),130),   'ID:',         trunc(String(session.id||'-'),130)],
+    ['Date:',        fmtDate(session.date),                  'Attendees:',  String((session.attendees||[]).length)],
+    ['Facilitator:', trunc(String(session.fac||'-'),130),    'Venue:',      trunc(String(session.venue||'-'),130)],
+    ['Closed:',      new Date().toLocaleString('en-ZA'),     'Emailed to:', trunc(String(CONFIG.ADMIN_EMAIL||'-'),130)]
+  ];
+  for(var mi=0; mi<metaRows.length; mi++){
+    var mr=metaRows[mi];
+    doc.setFont('helvetica','bold');   doc.text(mr[0], r(M),    r(metaY));
+    doc.setFont('helvetica','normal'); doc.text(mr[1], r(M+68), r(metaY));
+    doc.setFont('helvetica','bold');   doc.text(mr[2], r(c2),   r(metaY));
+    doc.setFont('helvetica','normal'); doc.text(mr[3], r(c2+68),r(metaY));
+    metaY += 15.6;
+  }
+
+  metaY += 6;
+  doc.setDrawColor(210,215,230);
+  doc.line(r(M), r(metaY), r(M+TW), r(metaY));
+  metaY += 8;
+
+  // Table header — all values rounded via r()
+  function drawHeader(hy) {
+    var rhy = r(hy);
+    doc.setFillColor(232,237,253);
+    doc.rect(r(M), rhy, r(TW), r(HDRH), 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(6.5);
+    doc.setTextColor(40,60,140); doc.setDrawColor(180,195,230);
+    var hx = M;
+    for(var i=0; i<CW.length; i++){
+      doc.rect(r(hx), rhy, r(CW[i]), r(HDRH), 'SD');
+      doc.text(PDF.HDR[i], r(hx+4), r(hy+13));
+      hx += CW[i];
+    }
+    return hy + HDRH;
+  }
+
+  var ty = drawHeader(metaY);
+
+  // Sig column x
+  var sigX = M;
+  for(var sc=0; sc<CW.length-1; sc++) sigX += CW[sc];
+  var sigW = CW[8] - 11;
+  var sigH = ROWH - 11;
+
+  // Rows
+  var atts = session.attendees || [];
+  for(var ai=0; ai<atts.length; ai++){
+    var a = atts[ai];
+    if(ty + ROWH > PH - 34){
+      doc.addPage();
+      doc.setFillColor(45,91,227); doc.rect(r(0),r(0),r(PW),r(28),'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(255,255,255);
+      doc.text(trunc(String(session.name)+' (continued)',TW), r(M), r(20));
+      ty = drawHeader(40);
+    }
+    doc.setFillColor(ai%2===0?255:248, ai%2===0?255:249, ai%2===0?255:253);
+    doc.setDrawColor(215,220,230);
+    doc.rect(r(M), r(ty), r(TW), r(ROWH), 'FD');
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(40,40,40);
+    var vals=[String(ai+1),String(a.fname||''),String(a.sname||''),String(a.gender||''),String(a.email||''),String(a.phone||''),a.consent?'Yes':'No',String(a.time||'')];
+    var cx = M;
+    for(var ci=0; ci<CW.length-1; ci++){
+      doc.rect(r(cx), r(ty), r(CW[ci]), r(ROWH), 'SD');
+      doc.text(trunc(vals[ci], CW[ci]-8), r(cx+4), r(ty+16));
+      cx += CW[ci];
+    }
+    doc.rect(r(sigX), r(ty), r(CW[8]), r(ROWH), 'SD');
+    var sig = a.sig;
+    if(sig && typeof sig==='string' && sig.indexOf('data:image')===0){
+      var b64 = sig.split(',')[1];
+      if(b64 && b64.length > 50){
+        try{ doc.addImage(sig, sig.indexOf('jpeg')>0?'JPEG':'PNG', r(sigX+4), r(ty+4), r(sigW), r(sigH)); }
+        catch(e){ console.warn('sig skip row'+ai,e.message); }
+      }
+    }
+    ty += ROWH;
+  }
+
+  // Footers
+  var pages = doc.internal.getNumberOfPages();
+  for(var pg=1; pg<=pages; pg++){
+    doc.setPage(pg);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(160,160,160);
+    doc.text('Generated '+new Date().toLocaleString('en-ZA')+' | '+String(session.id||''), r(M), r(PH-14));
+    doc.text('Page '+pg+' of '+pages, r(PW-M), r(PH-14), {align:'right'});
+  }
+  return doc;
+}
+
+function sanitiseSession(s){
+  return {
+    id:       String(s.id||'UNKNOWN'),
+    name:     String(s.name||'Unnamed'),
+    date:     String(s.date||new Date().toISOString().split('T')[0]),
+    fac:      String(s.fac||'-'),
+    venue:    String(s.venue||'-'),
+    attendees:(s.attendees||[]).map(function(a){
+      return {fname:String(a.fname||''),sname:String(a.sname||''),email:String(a.email||''),gender:String(a.gender||''),phone:String(a.phone||''),consent:!!a.consent,time:String(a.time||''),sig:(typeof a.sig==='string'&&a.sig.indexOf('data:image')===0)?a.sig:null};
+    })
+  };
+}
+
+function downloadPDF(){
+  var s=state.sessions.find(function(x){return x.id===state.activeId;});
+  if(!s)return;
+  try{ buildPDF(sanitiseSession(s)).save(s.id+'_attendance_register.pdf'); }
+  catch(e){ alert('PDF error: '+e.message); }
+}
+
+// ---- Brevo ----
+async function sendViaBrevo(session, pdfDoc){
+  var b64 = pdfDoc.output('datauristring').split(',')[1];
+  var html = '<div style="font-family:sans-serif;max-width:600px;margin:0 auto"><div style="background:#2d5be3;padding:20px;border-radius:8px 8px 0 0"><h1 style="color:#fff;margin:0;font-size:18px;">Attendance Register &mdash; '+session.name+'</h1></div><div style="background:#f9f9f9;padding:24px;border:1px solid #e8e8e8;border-top:none;border-radius:0 0 8px 8px"><table style="width:100%;font-size:14px;border-collapse:collapse"><tr><td style="padding:6px 0;color:#555;width:140px">Session ID</td><td style="padding:6px 0;font-weight:600">'+session.id+'</td></tr><tr><td style="padding:6px 0;color:#555">Date</td><td style="padding:6px 0">'+fmtDate(session.date)+'</td></tr><tr><td style="padding:6px 0;color:#555">Facilitator</td><td style="padding:6px 0">'+session.fac+'</td></tr><tr><td style="padding:6px 0;color:#555">Venue</td><td style="padding:6px 0">'+(session.venue||'-')+'</td></tr><tr><td style="padding:6px 0;color:#555">Attendees</td><td style="padding:6px 0;font-weight:600;color:#1a8a5a">'+session.attendees.length+'</td></tr></table><p style="margin-top:20px;font-size:13px;color:#777">The completed attendance register is attached as a PDF.</p></div></div>';
+  var res = await fetch('https://api.brevo.com/v3/smtp/email',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','api-key':CONFIG.BREVO_API_KEY,'accept':'application/json'},
+    body:JSON.stringify({
+      sender:{name:CONFIG.SENDER_NAME,email:CONFIG.SENDER_EMAIL},
+      to:[{email:CONFIG.ADMIN_EMAIL,name:CONFIG.ADMIN_NAME}],
+      subject:'Attendance Register - '+session.name+' ('+fmtDate(session.date)+')',
+      htmlContent:html,
+      textContent:'Attendance Register: '+session.name+'\nDate: '+fmtDate(session.date)+'\nFacilitator: '+session.fac+'\nAttendees: '+session.attendees.length,
+      attachment:[{content:b64,name:session.id+'_attendance_register.pdf'}]
+    })
+  });
+  if(!res.ok){var err=await res.json().catch(function(){return {};});throw new Error(err.message||'Brevo error '+res.status);}
+  return res.json();
+}
+
+// ---- Close session ----
+async function closeSession(){
+  var s=state.sessions.find(function(x){return x.id===state.activeId;});
+  if(!s)return;
+  if(s.attendees.length===0&&!confirm('No attendees yet. Close anyway?'))return;
+  if(!confirm('Close session and email register to '+CONFIG.ADMIN_EMAIL+'?'))return;
+  var btn=document.getElementById('close-btn');
+  btn.disabled=true;btn.textContent='Working...';
+  showSteps(true);setProgress(10);
+  setStep('step-pdf','active');setStep('step-email','');setStep('step-done','');
+  var pdfDoc=null;
+  try{
+    pdfDoc=buildPDF(sanitiseSession(s));
+    setStep('step-pdf','done');setProgress(45);setStep('step-email','active');
+    await sendViaBrevo(s,pdfDoc);
+    setStep('step-email','done');setProgress(90);setStep('step-done','active');
+    s.closed=true;saveSession(s);
+    setProgress(100);setStep('step-done','done');
+    setTimeout(function(){
+      showSteps(false);setProgress(0);
+      btn.disabled=false;btn.textContent='Close session & email register';
+      renderRegister();
+      showFlash('success','Session closed. Register emailed to '+CONFIG.ADMIN_EMAIL+' and downloaded.',8000);
+      pdfDoc.save(s.id+'_attendance_register.pdf');
+    },600);
+  }catch(err){
+    console.error('closeSession error:',err);
+    setProgress(0);showSteps(false);
+    btn.disabled=false;btn.textContent='Close session & email register';
+    alert('Error: '+err.message+'\n\nStack: '+(err.stack||'none'));
+    showFlash('error','Failed: '+err.message,0);
+    if(pdfDoc){try{pdfDoc.save(s.id+'_attendance_register.pdf');}catch(e2){}}
+  }
+}
+
+// ---- Render ----
+function renderRegister(){
+  var ae=document.getElementById('admin-email-display'),ce=document.getElementById('closed-email-display');
+  if(ae)ae.textContent=CONFIG.ADMIN_EMAIL;if(ce)ce.textContent=CONFIG.ADMIN_EMAIL;
+  var s=state.sessions.find(function(x){return x.id===state.activeId;});
+  if(!s){document.getElementById('no-session-msg').style.display='block';document.getElementById('register-content').style.display='none';return;}
+  document.getElementById('no-session-msg').style.display='none';document.getElementById('register-content').style.display='block';
+  document.getElementById('disp-id').textContent=s.id;
+  document.getElementById('disp-name').textContent=s.name;
+  document.getElementById('disp-date').textContent=fmtDate(s.date);
+  document.getElementById('disp-fac').textContent=s.fac||'-';
+  document.getElementById('disp-venue').textContent=s.venue||'-';
+  document.getElementById('closed-badge').style.display=s.closed?'inline-flex':'none';
+  document.getElementById('close-panel').style.display=s.closed?'none':'block';
+  document.getElementById('closed-actions').style.display=s.closed?'block':'none';
+  document.getElementById('form-card').style.display=s.closed?'none':'block';
+  updateCount();renderAttendeeTable(s);
+  if(!s.closed)setTimeout(initSig,60);
+}
+function updateCount(){
+  var s=state.sessions.find(function(x){return x.id===state.activeId;});if(!s)return;
+  var n=s.attendees.length;document.getElementById('count-badge').textContent=n+' attendee'+(n===1?'':'s');
+}
+function renderAttendeeTable(s){
+  var card=document.getElementById('attendee-card'),tbody=document.getElementById('att-tbody');
+  if(!s.attendees.length){card.style.display='none';return;}
+  card.style.display='block';
+  tbody.innerHTML=s.attendees.map(function(a,i){
+    return '<tr><td style="color:var(--ink3);font-size:12px;">'+(i+1)+'</td><td><strong>'+a.fname+' '+a.sname+'</strong></td><td>'+a.email+'</td><td>'+(a.phone||'-')+'</td><td>'+(a.gender||'-')+'</td><td><span class="consent-dot '+(a.consent?'yes':'no')+'" title="'+(a.consent?'Yes':'No')+'"></span></td><td style="font-size:12px;color:var(--ink3);">'+a.time+'</td><td>'+(a.sig?'<img class="att-sig-thumb" src="'+a.sig+'" alt="sig"/>':'')+'</td></tr>';
+  }).join('');
+}
+function renderSessions(){
+  var el=document.getElementById('sessions-list');
+  if(!state.sessions.length){el.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:1rem;">&#x1F4CB;</div><p>No sessions yet.</p></div>';return;}
+  el.innerHTML=state.sessions.map(function(s){
+    var active=s.id===state.activeId;
+    return '<div class="session-item'+(s.closed?' closed':'')+'" onclick="loadSession(\''+s.id+'\')"><div style="min-width:0"><div class="session-item-name">'+s.name+(active?' <span style="font-size:11px;color:var(--accent);font-weight:500;">&#x25CF; Active</span>':'')+'</div><div class="session-item-meta">'+fmtDate(s.date)+' &middot; '+s.fac+(s.venue?' &middot; '+s.venue:'')+'</div><div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--ink3);margin-top:3px;">'+s.id+'</div></div><span class="pill '+(s.closed?'pill-purple':'pill-green')+'">'+(s.closed?'&#x2713; Closed':s.attendees.length+' attendee'+(s.attendees.length===1?'':'s'))+'</span></div>';
+  }).join('');
+}
+
+// ---- Init ----
+document.getElementById('ns-date').value=new Date().toISOString().split('T')[0];
+loadState();
+renderRegister();
+</script>
+</body>
+</html>
