@@ -519,8 +519,15 @@ async function sendViaBrevo(session, pdfDoc){
       attachment:[{content:b64,name:session.id+'_attendance_register.pdf'}]
     })
   });
-  if(!res.ok){var err=await res.json().catch(function(){return {};});throw new Error(err.message||'Brevo error '+res.status);}
-  return res.json();
+  var responseText = await res.text();
+  console.log('Brevo response status:', res.status);
+  console.log('Brevo response body:', responseText);
+  if(!res.ok){
+    var err={};
+    try{err=JSON.parse(responseText);}catch(e){}
+    throw new Error('Brevo '+res.status+': '+(err.message||err.code||responseText.slice(0,200)));
+  }
+  return JSON.parse(responseText);
 }
 
 // ---- Close session ----
